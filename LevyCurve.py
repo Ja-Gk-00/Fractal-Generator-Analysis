@@ -10,8 +10,9 @@ class LevyCCurve:
     ----------
     method : str
         Algorithm used to generate points. Options:
-        - "lsystem" : L-system approach (default)
-        - "ifs"     : Iterated Function System (chaos game)
+        - "lsystem"     : L-system approach (default)
+        - "ifs"         : Iterated Function System (chaos game)
+        - "ifs-modified": IFS with changed matrixes
     iterations : int, optional
         Depth of recursion in L-system
     angle_deg : float, optional
@@ -20,7 +21,7 @@ class LevyCCurve:
         Rules for replacing symbols in the L-system
         Example: {"F": "+F--F+"} (default for Lévy C-curve)
     n_pouint : int, optional
-        Number of points generated in IFS method
+        Number of points generated in IFS methods
     """
 
     def __init__(self, method="lsystem", iterations=12, angle_deg=45.0, lsystem_rules=None, n_points=50000):
@@ -41,8 +42,10 @@ class LevyCCurve:
             self.points = self._generate_lsystem_points()
         elif self.method == "ifs":
             self.points = self._generate_ifs_points()
+        elif self.method == "ifs-modified":
+            self.points = self._generate_ifs_modified()
         else:
-            raise ValueError(f"Unknown method '{self.method}'. Supported: 'lsystem', 'ifs'")
+            raise ValueError(f"Unknown method '{self.method}'. Supported: 'lsystem', 'ifs', 'ifs-modified'")
         return self.points
 
     def plot(self, show=True, figsize=(6,6), title=None, linewidth = 0.8):
@@ -53,6 +56,9 @@ class LevyCCurve:
         xs, ys = zip(*self.points)
         plt.figure(figsize=figsize)
         if self.method == "ifs":
+            plt.scatter(xs, ys, s=linewidth/4)
+            plt.title(title or f"Lévy C-curve (method={self.method})", pad=12)
+        elif self.method == "ifs-modified":
             plt.scatter(xs, ys, s=linewidth/4)
             plt.title(title or f"Lévy C-curve (method={self.method})", pad=12)
         else:
@@ -110,6 +116,32 @@ class LevyCCurve:
         x = np.array([0.0, 0.0], dtype=float)
 
         theta = np.pi / 4 
+        scale = 1 / np.sqrt(2)
+        R1 = scale * np.array([[np.cos(theta), -np.sin(theta)],
+                            [np.sin(theta),  np.cos(theta)]])
+        R2 = scale * np.array([[np.cos(-theta), -np.sin(-theta)],
+                            [np.sin(-theta),  np.cos(-theta)]])
+        b1 = np.array([0, 0])
+        b2 = np.array([0.5, 0.5])
+
+        transforms = [(R1, b1), (R2, b2)]
+        probs = [0.5, 0.5]
+
+        points = []
+        for i in range(self.n_points + discard):
+            k = rng.choice(len(transforms), p=probs)
+            x = transforms[k][0] @ x + transforms[k][1]
+            if i >= discard:
+                points.append(x.copy())
+
+        return points
+    
+    def _generate_ifs_modified(self, discard=50):
+        """Generate points using Iterated Function System (IFS) for Lévy C-curve."""
+        rng = np.random.default_rng(123)
+        x = np.array([0.0, 0.0], dtype=float)
+
+        theta = np.pi / 6
         scale = 1 / np.sqrt(2)
         R1 = scale * np.array([[np.cos(theta), -np.sin(theta)],
                             [np.sin(theta),  np.cos(theta)]])
