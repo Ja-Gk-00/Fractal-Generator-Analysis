@@ -2,10 +2,11 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 class LevyCCurve:
     """
     Lévy C-curve generator.
-    
+
     Parameters
     ----------
     method : str
@@ -23,7 +24,9 @@ class LevyCCurve:
         Number of points generated in IFS method
     """
 
-    def __init__(self, method="lsystem", iterations=12, angle_deg=45.0, lsystem_rules=None, n_points=50000):
+    def __init__(
+        self, method="lsystem", iterations=12, angle_deg=45.0, lsystem_rules=None, n_points=50000
+    ):
         self.method = method.lower()
         self.iterations = iterations
         self.angle_deg = angle_deg
@@ -45,7 +48,7 @@ class LevyCCurve:
             raise ValueError(f"Unknown method '{self.method}'. Supported: 'lsystem', 'ifs'")
         return self.points
 
-    def plot(self, show=True, figsize=(6,6), title=None, linewidth = 0.8):
+    def plot(self, show=True, figsize=(6, 6), title=None, linewidth=0.8):
         """Plot generated points."""
         if not self.points:
             self.generate()
@@ -53,13 +56,17 @@ class LevyCCurve:
         xs, ys = zip(*self.points)
         plt.figure(figsize=figsize)
         if self.method == "ifs":
-            plt.scatter(xs, ys, s=linewidth/4)
+            plt.scatter(xs, ys, s=linewidth / 4)
             plt.title(title or f"Lévy C-curve (method={self.method})", pad=12)
         else:
             plt.plot(xs, ys, linewidth=linewidth)
-            plt.title(title or f"Lévy C-curve (method={self.method}, {self.angle_deg}) — iterations={self.iterations}", pad=12)
-        plt.axis('equal')
-        plt.axis('off')            
+            plt.title(
+                title
+                or f"Lévy C-curve (method={self.method}, {self.angle_deg}) — iterations={self.iterations}",
+                pad=12,
+            )
+        plt.axis("equal")
+        plt.axis("off")
         plt.tight_layout()
         if show:
             plt.show()
@@ -109,12 +116,10 @@ class LevyCCurve:
         rng = np.random.default_rng(123)
         x = np.array([0.0, 0.0], dtype=float)
 
-        theta = np.pi / 4 
+        theta = np.pi / 4
         scale = 1 / np.sqrt(2)
-        R1 = scale * np.array([[np.cos(theta), -np.sin(theta)],
-                            [np.sin(theta),  np.cos(theta)]])
-        R2 = scale * np.array([[np.cos(-theta), -np.sin(-theta)],
-                            [np.sin(-theta),  np.cos(-theta)]])
+        R1 = scale * np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+        R2 = scale * np.array([[np.cos(-theta), -np.sin(-theta)], [np.sin(-theta), np.cos(-theta)]])
         b1 = np.array([0, 0])
         b2 = np.array([0.5, 0.5])
 
@@ -129,5 +134,3 @@ class LevyCCurve:
                 points.append(x.copy())
 
         return points
-
-
