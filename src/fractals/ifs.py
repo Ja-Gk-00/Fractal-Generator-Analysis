@@ -6,12 +6,12 @@ from .utils import normalize_probs, seeded_rng
 
 @dataclass
 class Affine2D:
-    A: np.ndarray  # 2x2
-    b: np.ndarray  # (2,)
+    A: np.ndarray  # macierz 2x2
+    b: np.ndarray  # wektor (2,)
 
 
 class IFS:
-    """Iterated Function System in 2D with a chaos game sampler."""
+    """IFS 2D z probkowaniem"""
 
     def __init__(self, transforms: list[Affine2D], probs: list[float] | None = None):
         self.transforms = transforms
@@ -21,14 +21,14 @@ class IFS:
         self,
         n_points: int = 50_000,
         discard: int = 100,
-        seed: int | None = 123,
+        seed: int | None = 1337,
         x0: np.ndarray | None = None,
     ) -> list[tuple[float, float]]:
-        rng = seeded_rng(seed)
+        rng = seeded_rng(seed)  # losowe wybory transformacji
         x = np.array([0.0, 0.0], dtype=float) if x0 is None else np.asarray(x0, dtype=float)
         pts: list[tuple[float, float]] = []
 
-        for i in range(n_points + discard):
+        for i in range(n_points + discard):  # zbieranie punktow
             k = rng.choice(len(self.transforms), p=self.probs)
             T = self.transforms[k]
             x = T.A @ x + T.b

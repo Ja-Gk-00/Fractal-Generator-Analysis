@@ -3,35 +3,43 @@ import numpy as np
 from .utils import rot2d
 from .ifs import IFS, Affine2D
 
-# --- Variant 1: α-Lévy curve (generalized angle) ------------------------------
-
-
+# Wariant I, uogolniony kat
 def levy_ifs_generalized(angle_deg: float = 45.0) -> IFS:
-    """
-    Return an IFS for a generalized Lévy-like curve using ±angle and scale 1/sqrt(2).
-    For angle=45° it reduces to the classical Lévy C-curve.
-    """
+    """IFS krzywej typu Levy dla ±angle i skali 1/sqrt(2)."""
     theta = np.deg2rad(angle_deg)
     s = 1.0 / np.sqrt(2.0)
     R1 = s * rot2d(+theta)
     R2 = s * rot2d(-theta)
-    # Translation chosen to keep endpoints roughly within [0,1]^2
+    # translacje trzymaja ksztalt w oknie [0,1]^2
     b1 = np.array([0.0, 0.0])
     b2 = np.array([0.5, 0.5])
     return IFS([Affine2D(R1, b1), Affine2D(R2, b2)], probs=[0.5, 0.5])
 
 
-# --- Variant 2: stochastic L-system (probabilistic rule) ----------------------
-
+# Wariant II, stochastyczny wybor zasad dla L-systemu
 
 def levy_lsystem_stochastic(p: float = 0.5) -> tuple[str, dict[str, str]]:
-    """Return axiom and a pair of alternative rules applied with prob p/(1-p).
-
-    Use with an L-system engine that supports random choice per symbol (implemented
-    by the notebook demo or an extended interpreter). Here we only provide rules.
-    """
-    # Two slight perturbations of the classic rule
-    rules_a = {"F": "+F--F+"}
-    rules_b = {"F": "+F-+F-"}
-    # The caller decides how to sample A/B per expansion step per symbol.
+    """Zwraca aksjomat i alternatywne reguly stosowane z prawd. p/(1-p)."""
+    # wybor A/B realizuje wywolujacy (tu tylko definicje)
     return "F", {"A": "+F--F+", "B": "+F-+F-"}
+
+def lsystem_expand_stochastic(
+    axiom: str = "F",
+    iterations: int = 12,
+    p: float = 0.25,
+    rule_classic: str = "+F--F+",
+    rule_variant: str = "+F-+F-",
+    seed: int | None = 0,
+) -> str:
+    """Stochastyczny wybor: kazde 'F' -> wariant z p lub originalny z 1-p."""
+    rng = np.random.default_rng(seed)
+    s = axiom
+    for _ in range(iterations):
+        out = []
+        for ch in s:
+            if ch == "F":
+                out.append(rule_variant if rng.random() < p else rule_classic)
+            else:
+                out.append(ch)
+        s = "".join(out)
+    return s

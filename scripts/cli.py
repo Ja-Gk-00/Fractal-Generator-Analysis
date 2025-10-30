@@ -9,7 +9,7 @@ from fractals.plotting import plot_polyline, plot_scatter, plot_iterations_grid
 from fractals.metrics import estimate_box_dimension
 
 
-app = typer.Typer(help="Lévy C-curve: L-system + IFS + analysis")
+app = typer.Typer(help="Levy C-curve: L-system + IFS + analysis")
 
 
 def _save(fig, outfile: Optional[str]):
@@ -27,16 +27,16 @@ def draw(
     linewidth: float = typer.Option(0.8, help="Polyline linewidth (lsystem)"),
     outfile: Optional[str] = typer.Option(None, help="Path to save figure"),
 ):
-    """Draw Lévy C-curve using the chosen method."""
+    """Draw Levy C-curve using the chosen method."""
     method = method.lower()
     lc = LevyCCurve(method=method, iterations=iter, angle_deg=angle, n_points=n_points)
     pts = lc.generate()
 
     if method == "ifs":
-        fig = plot_scatter(pts, title=f"Lévy C-curve (IFS)")
+        fig = plot_scatter(pts, title=f"Levy C-curve (IFS)")
     else:
         fig = plot_polyline(
-            pts, linewidth=linewidth, title=f"Lévy C-curve (L-system, angle={angle}°, it={iter})"
+            pts, linewidth=linewidth, title=f"Levy C-curve (L-system, angle={angle}°, it={iter})"
         )
         _save(fig, outfile)
 
@@ -49,7 +49,7 @@ def compare(
     angle: float = typer.Option(45.0, help="Angle for L-system"),
     outfile: Optional[str] = typer.Option(None, help="Path to save figure"),
 ):
-    """Show a grid of iterations for the classic Lévy C-curve."""
+    """Show a grid of iterations for the classic Levy C-curve."""
     fig = plot_iterations_grid(iter_start=start, iter_stop=stop, angle_deg=angle)
     _save(fig, outfile)
 
@@ -60,11 +60,11 @@ def dimension(
     angle: float = typer.Option(45.0, help="Angle for L-system"),
     outfile: Optional[str] = typer.Option(None, help="Path to save regression plot"),
 ):
-    """Estimate box-counting (Minkowski) dimension for a Lévy C-curve polyline."""
+    """Estimate Minkowski dimension for a Levy C-curve polyline."""
     lc = LevyCCurve(method="lsystem", iterations=iter, angle_deg=angle)
     pts = lc.generate()
-    deltas = [2 ** (-k) for k in range(3, 9)]  # a simple dyadic range
-    fig, _ = estimate_box_dimension(pts, deltas=deltas, title_prefix="Lévy C-curve")
+    deltas = [2 ** (-k) for k in range(3, 9)]
+    fig, _ = estimate_box_dimension(pts, deltas=deltas, title_prefix="Levy C-curve")
     _save(fig, outfile)
 
 

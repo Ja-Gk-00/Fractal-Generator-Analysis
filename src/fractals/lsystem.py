@@ -11,7 +11,7 @@ class LSystemSpec:
 
 
 class LSystem:
-    """Generic L-system expander + turtle interpreter (2D)."""
+    """Ogolny L-system 2D."""
 
     def __init__(self, spec: LSystemSpec, iterations: int = 12):
         self.spec = spec
@@ -19,6 +19,7 @@ class LSystem:
         self.expanded: str | None = None
 
     def expand(self) -> str:
+        """Zwraca instrukcje po N iteracjach."""
         s = self.spec.axiom
         for _ in range(self.iterations):
             s = "".join(self.spec.rules.get(ch, ch) for ch in s)
@@ -26,11 +27,11 @@ class LSystem:
         return s
 
     def interpret(self, step: float | None = None) -> list[tuple[float, float]]:
+        """Konwertuje instrukcje na punkty (x, y)."""
         if self.expanded is None:
             self.expand()
         instructions = self.expanded
-        angle = math.radians(self.spec.angle_deg)
-        # Heuristic step so total size stays bounded
+        angle = math.radians(self.spec.angle_deg)s
         if step is None:
             step = 1.0 / (2 ** (self.iterations / 2))
 
@@ -39,20 +40,20 @@ class LSystem:
         stack: list[tuple[float, float, float]] = []
 
         for ch in instructions:
-            if ch in ("F", "G"):  # draw forward
+            if ch in ("F", "G"):  # rysuj do przodu
                 x += step * math.cos(heading)
                 y += step * math.sin(heading)
                 pts.append((x, y))
-            elif ch == "f":  # move forward without drawing
+            elif ch == "f":  # ruch bez rysowania
                 x += step * math.cos(heading)
                 y += step * math.sin(heading)
-            elif ch == "+":
+            elif ch == "+":  # obrot w prawo
                 heading -= angle
-            elif ch == "-":
+            elif ch == "-":  # obrot w lewo
                 heading += angle
-            elif ch == "[":
+            elif ch == "[":  # zapisz stan
                 stack.append((x, y, heading))
-            elif ch == "]":
+            elif ch == "]":  # przywroc stan
                 x, y, heading = stack.pop()
                 pts.append((x, y))
         return pts
