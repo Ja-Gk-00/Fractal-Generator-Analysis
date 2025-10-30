@@ -31,7 +31,7 @@ class LSystem:
         if self.expanded is None:
             self.expand()
         instructions = self.expanded
-        angle = math.radians(self.spec.angle_deg)s
+        angle = math.radians(self.spec.angle_deg)
         if step is None:
             step = 1.0 / (2 ** (self.iterations / 2))
 
